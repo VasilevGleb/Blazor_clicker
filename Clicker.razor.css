@@ -1,0 +1,39 @@
+.head1 {
+	background: black;
+	text-align: center;
+	color: gold;
+}
+
+.resource-panel {
+	margin-top: 50px;
+	display: flex;
+	gap: 50px;
+	justify-content: center;
+}
+
+.column {
+	flex: 1;
+	border: 2px solid;
+}
+
+#shop,
+#clicker,
+#upgrades {
+	text-align: center;
+}
+
+.affordable {
+	background: lightgreen;
+}
+
+.expensive {
+	background: red;
+}
+
+.resource-Btn {
+	border-radius: 10px;
+}
+
+#goldBtn {
+	background: gold;
+}
