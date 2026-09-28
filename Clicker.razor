@@ -1,0 +1,163 @@
+@page "/clicker"
+@rendermode InteractiveServer
+
+ @* Html  *@
+<div class="head1">
+	<h1>Gold Clicker</h1>
+</div>
+
+<div class="resource-panel">
+
+	<div id="upgrades" class="column">
+		<h4>Upgrades</h4>
+		<div class="worker-panel">
+
+			<p>👷: @workerCount </p>
+
+		</div>
+		<div class="mine-panel">
+
+			<p>⛏️: @mineCount </p>
+
+			
+		</div>
+		<div class="dc-panel">
+			<p>x2👆: @doubleClickCount</p>
+		</div>
+	</div>
+
+
+	<div id="clicker" class="column">
+		<h4>Gold</h4>
+		<div class="gold-panel">
+			<p>🪙 @GoldResult</p>
+			<p>🪙 click: @GpC </p>
+			<button id="goldBtn" class="resource-Btn" @onclick="clickGold">Click Gold</button>
+		</div>
+	</div>
+
+	
+	<div id="shop" class="column">
+
+		<h4>Shop</h4>
+
+		<p>👷 cost: @WorkerCostResult</p>
+		<button id="slaveBtn" class="resource-Btn @(gold >= workerCost ? "affordable" : "expensive")"
+				@onclick="buyWorker">
+			Buy worker</button>
+
+			@* Buy first mine only if enougth gold and minimum 1 worker *@
+			<p>⛏️ cost: @MineCostResult</p>
+
+			<button id="mineBtn" class="resource-Btn @(gold >= mineCost && workerCount >= 2 ? "affordable" : "expensive")"
+					@onclick="buyMine">
+				Buy mine
+			</button>
+
+			<p>x2👆cost: @DoubleClickCostResult</p>
+			<button class="resource-Btn @(gold >= doubleClickCost && workerCount >= 5 ? "affordable" : "expensive")"
+					@onclick="buyDC">Buy
+				double-click
+			</button>
+		</div>
+
+	</div>
+
+
+
+@code {
+
+	
+	private int click = 0;
+	private double gold = 0;
+
+	private class Upgrade
+	{
+		public string Name;
+		public int Count;
+		public double Cost;
+		public Func<int, double> GoldFormula;
+
+		public Upgrade(string name, int count, double cost, Func<int, double> gf)
+		{
+			Name = name;
+			Count = count;
+			Cost = cost;
+			GoldFormula = gf;
+		}
+
+	}
+	Upgrade mine = new Upgrade("Mine", 0, 30, count => Math.Pow(2, count));
+	Upgrade worker = new Upgrade("Worker", 0, 10, count => count);
+	Upgrade doubleClick = new Upgrade("DoubleCLick", 0, 50, count => Math.Pow(2, count) - 1);
+
+	private int workerCount = 0;
+	private double workerCost = 10f;
+
+	private int mineCount = 0;
+	private double mineCost = 30f;
+
+	private int doubleClickCount = 0;
+	private double doubleClickCost = 50f;
+
+	
+	// Округление до 1 чисел после запятой
+	private double Round2(double value) => Math.Round(value, 1);
+	private double GoldResult => Round2(gold);
+	private double WorkerCostResult => Round2(workerCost);
+	private double MineCostResult => Round2(mineCost);
+	private double DoubleClickCostResult => Round2(doubleClickCost);
+
+	private double GoldPerMine => Math.Pow(2, mineCount);
+	private double GoldPerSlave => workerCount;
+	private double GoldDC => Math.Pow(2, doubleClickCount);
+
+	// GpC = Gold per Click
+	private double GpC => GoldPerMine + GoldPerSlave + GoldDC - 1;
+
+	private double Cost(double value) => value * 1.5;
+
+	private void clickGold()
+	{
+		gold += GpC;
+		click++;
+		if (click % 5 == 0)
+		{
+			gold += 1;
+		}
+
+	}
+
+	private void buyMine()
+	{
+		if (gold >= mineCost && workerCount >= 2)
+		{
+			gold -= mineCost;
+			mineCount++;
+			mineCost = Cost(mineCost);
+
+		}
+	}
+
+	private void buyWorker()
+	{
+		if (gold >= workerCost)
+		{
+			gold -= workerCost;
+			workerCount++;
+			workerCost = Cost(workerCost);
+
+		}
+	}
+
+	private void buyDC()
+	{
+		if (gold >= doubleClickCost && workerCount >= 5)
+		{
+			gold -= doubleClickCost;
+			doubleClickCount++;
+			doubleClickCost = Cost(doubleClickCost);
+		}
+	}
+
+}
